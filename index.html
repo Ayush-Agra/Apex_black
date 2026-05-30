@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApexBlack | Professional Tyre Dressing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #030303;
+            color: #F8FAFC;
+        }
+
+        .brand-font {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .premium-bg { 
+            background: radial-gradient(circle at top right, #1a1510 0%, #030303 60%); 
+        }
+
+        .gold-glow { 
+            box-shadow: 0 0 40px -5px rgba(245, 158, 11, 0.2); 
+        }
+
+        .gold-glow:hover {
+            box-shadow: 0 0 50px -5px rgba(245, 158, 11, 0.45);
+        }
+
+        .glass-panel { 
+            background: rgba(18, 18, 18, 0.6); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+
+        /* Subtle interactive animations */
+        .fade-slide-up {
+            animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen premium-bg flex items-center justify-center p-4 md:p-8 lg:p-12 selection:bg-amber-500 selection:text-black">
+
+    <div id="app-root" class="w-full max-w-6xl mx-auto flex items-center justify-center">
+        <!-- Views will be dynamically injected here -->
+    </div>
+
+    <script>
+        // CONFIG: Change this to your live backend domain in production (e.g. 'https://api.apexblack.com')
+        // Leaving it empty or as a relative path works if the frontend and backend are hosted on the same server/domain.
+        const BACKEND_API_URL = "http://127.0.0.1:8000"; 
+
+        // --- BACKEND SERVICE ROUTE (Pure Separation Boundary) ---
+        // Secure: No Firebase code or configurations exist on the client anymore!
+        const OrderService = {
+            submitWaitlist: async (contactValue) => {
+                const response = await fetch(`${BACKEND_API_URL}/api/waitlist`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ contact: contactValue })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Server communication error");
+                }
+
+                return await response.json();
+            }
+        };
+
+        // --- SVGs for High-End Aesthetic ---
+        const svgs = {
+            gloss: `<svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`,
+            shield: `<svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`,
+            water: `<svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>`,
+            dryTouch: `<svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11.571V11m.67-6.51c.361-1.018 1.416-1.57 2.474-1.385a4.01 4.01 0 012.784 2.54 3.018 3.018 0 01-1.9 3.333c-.66.255-1.278.683-1.783 1.224A5.598 5.598 0 0110 13.125V13M14 20h.01M18 20h.01M6 20h.01M10 20h.01m8-4H4"/></svg>`
+        };
+
+        // --- FRONTEND VIEW COMPILER ---
+        const renderLanding = () => {
+            const root = document.getElementById('app-root');
+            root.innerHTML = `
+                <div class="glass-panel w-full grid lg:grid-cols-12 gap-8 lg:gap-12 items-start rounded-3xl p-6 md:p-10 lg:p-12 shadow-2xl relative overflow-hidden fade-slide-up">
+                    
+                    <!-- Decorative Radial Lights -->
+                    <div class="absolute -top-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+                    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-zinc-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+                    <!-- Left: Media Display Section (lg:col-span-5) -->
+                    <div class="lg:col-span-5 flex flex-col gap-6 w-full">
+                        
+                        <!-- Premium Bottle Kit Frame -->
+                        <div class="relative bg-zinc-950/80 rounded-2xl p-6 border border-zinc-800/80 shadow-lg text-center group overflow-hidden">
+                            <!-- Shine effect on hover -->
+                            <div class="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white/5 opacity-40 group-hover:animate-shine pointer-events-none"></div>
+                            
+                            <span class="absolute top-4 left-4 bg-zinc-900/90 text-amber-500 text-[9px] font-bold tracking-widest px-3 py-1.5 rounded-full uppercase z-10 border border-zinc-800">
+                                BOTTLE & ACCESSORY KIT
+                            </span>
+                            
+                            <div class="py-4">
+                                <img src="bottle.jpeg" alt="ApexBlack Ultra Black Bottle" class="w-full h-auto max-h-[310px] object-contain rounded-xl mx-auto transition-transform duration-500 group-hover:scale-105" onerror="this.src='https://placehold.co/600x600/222/555?text=ApexBlack+Bottle'">
+                            </div>
+                        </div>
+
+                        <!-- Video Showcase Module -->
+                        <div class="relative bg-zinc-950/80 rounded-2xl overflow-hidden border border-zinc-800/80 aspect-video flex flex-col justify-center items-center shadow-lg group">
+                            <span class="absolute top-4 left-4 bg-amber-500 text-black text-[9px] font-extrabold tracking-widest px-3 py-1.5 rounded-full uppercase z-10">
+                                DYNAMIC DEMO
+                            </span>
+                            
+                            <!-- Video loop config -->
+                            <video id="product-action-video" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500" autoplay loop muted playsinline>
+                                <source src="demo.mp4" type="video/mp4">
+                            </video>
+
+                            <!-- Gradient Protection Sheet -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent flex flex-col justify-end p-5 z-10 pointer-events-none">
+                                <p class="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    EXPERIENCE EXTREME BEADING
+                                </p>
+                                <p class="text-xs text-zinc-400 mt-1 leading-relaxed">Provides super black shine, unmatched hydrophobicity and non-greasy UV protection.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Pricing, Specs, and Selling Arguments (lg:col-span-7) -->
+                    <div class="lg:col-span-7 space-y-8 relative z-10 text-left">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-[10px] font-bold tracking-widest uppercase border border-amber-500/20 mb-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Formulation Batch 02
+                            </div>
+                            <h1 class="text-6xl md:text-7xl font-black italic tracking-tighter uppercase leading-none text-white brand-font">
+                                APEX<span class="text-amber-500">BLACK</span>
+                            </h1>
+                            <p class="text-zinc-400 mt-3 font-semibold tracking-widest text-xs md:text-sm uppercase">
+                                Ultimate Ultra Black Tyre Finish
+                            </p>
+                        </div>
+
+                        <!-- Cost Banner -->
+                        <div class="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-5 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-zinc-500 uppercase tracking-wider block font-bold">Launch Price</span>
+                                <span class="text-3xl font-extrabold text-zinc-100 font-sans">₹599.00</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-amber-500/90 font-bold uppercase tracking-widest bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">Includes Kit</span>
+                                <span class="text-xs text-zinc-400 block mt-1.5">Showroom Microfiber + Applicator</span>
+                            </div>
+                        </div>
+
+                        <!-- Specialized Icon-Grid Features -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-zinc-800 pb-8">
+                            <div class="flex items-start gap-3">
+                                <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800/80 shrink-0">${svgs.gloss}</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Deep Wet Gloss</h4>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Showroom fresh black finish that highlights tyre details.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800/80 shrink-0">${svgs.shield}</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Advanced UV Guard</h4>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Blocks solar radiation, keeping tyre rubber supple.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800/80 shrink-0">${svgs.water}</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Highly Hydrophobic</h4>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Forces mud, road dirt, and rainwater to bead off easily.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800/80 shrink-0">${svgs.dryTouch}</div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">Dry-Touch Finish</h4>
+                                    <p class="text-xs text-zinc-400 mt-0.5">Leaves zero sticky layer. Does not attract road dust.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Our Commitment Section (Replacing Performance Comparison) -->
+                        <div class="space-y-4">
+                            <h3 class="text-xs font-bold text-amber-500 uppercase tracking-widest">Our Commitment</h3>
+                            <div class="p-6 rounded-2xl bg-zinc-950/40 border border-zinc-800/50 hover:bg-zinc-950/80 transition-all duration-300">
+                                <p class="text-sm md:text-base text-zinc-300 italic leading-relaxed text-center font-medium">
+                                    "At ApexBlack, we believe car care shouldn't just be about looks—it's about maintenance. We develop premium formulas that deliver professional results at home, ensuring your vehicle stands out with that showroom-ready finish every single day."
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- CTA Trigger: Scaled up for extra prominence -->
+                        <button onclick="router.navigate('order')" 
+                                class="w-full bg-amber-500 hover:bg-amber-400 text-black py-5 rounded-xl font-black uppercase tracking-widest text-sm transition-all gold-glow hover:scale-[1.01] active:scale-95 duration-200">
+                            Order Now
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderOrderPage = () => {
+            const root = document.getElementById('app-root');
+            root.innerHTML = `
+                <div class="w-full max-w-lg p-8 md:p-10 bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl relative overflow-hidden animate-in slide-in-from-bottom-10 duration-500 text-left">
+                    <div class="absolute -top-40 -right-40 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+                    <button onclick="router.navigate('home')" class="text-zinc-500 hover:text-white text-xs uppercase mb-8 transition-colors flex items-center gap-1">
+                        &larr; Back to Product
+                    </button>
+                    
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-[9px] font-bold tracking-widest uppercase border border-amber-500/20 mb-4">
+                        Sold Out
+                    </div>
+                    
+                    <h2 class="text-3xl font-black italic uppercase text-white mb-2 brand-font">Status: Fully Allocated</h2>
+                    <p class="text-zinc-400 text-sm leading-relaxed mb-8">
+                        Due to high demand from local professional car detailers and auto-enthusiasts, our introductory batch of ApexBlack is fully sold out. Enter your contact details below to join the priority list and get a one-time alert when our next batch drops.
+                    </p>
+
+                    <!-- Error and Success inline messages replace browser alerts -->
+                    <div id="inline-msg" class="mb-5 p-4 rounded-xl text-xs font-semibold hidden transition-all duration-300"></div>
+
+                    <div class="space-y-4">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                            Priority Notification Sign Up
+                        </label>
+                        <input type="text" id="contact" placeholder="Email Address or Phone Number" 
+                               class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
+                        
+                        <button onclick="handleWaitlist()" id="submit-btn" 
+                                class="w-full bg-white text-black py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-zinc-200 transition-colors">
+                            Request Notification
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // --- NAVIGATION ROUTER ---
+        const router = {
+            navigate: (page) => {
+                if (page === 'order') {
+                    renderOrderPage();
+                } else {
+                    renderLanding();
+                }
+            }
+        };
+
+        // --- CONTROLLER (Handles validation, loading state & submission routing) ---
+        const handleWaitlist = async () => {
+            const val = document.getElementById('contact').value.trim();
+            const inlineMsg = document.getElementById('inline-msg');
+            const btn = document.getElementById('submit-btn');
+            
+            if(!val) {
+                inlineMsg.className = "mb-5 p-4 rounded-xl text-xs font-bold bg-rose-500/10 border border-rose-500/20 text-rose-400 block";
+                inlineMsg.textContent = "Please enter your contact details to continue.";
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = "Securing Allocation...";
+            inlineMsg.className = "mb-5 p-4 rounded-xl text-xs font-medium bg-zinc-900 border border-zinc-800 text-zinc-400 block";
+            inlineMsg.textContent = "Registering on waitlist databases...";
+            inlineMsg.classList.remove('hidden');
+            
+            try {
+                // Relies secure execution completely to backend
+                await OrderService.submitWaitlist(val);
+                
+                inlineMsg.className = "mb-5 p-4 rounded-xl text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 block animate-pulse";
+                inlineMsg.textContent = "Success! You have secured priority status. We will alert you immediately upon restock.";
+                btn.textContent = "Waitlist Registered";
+                
+                setTimeout(() => {
+                    router.navigate('home');
+                }, 3000);
+
+            } catch (err) {
+                console.error("Save error: ", err);
+                inlineMsg.className = "mb-5 p-4 rounded-xl text-xs font-bold bg-rose-500/10 border border-rose-500/20 text-rose-400 block";
+                inlineMsg.textContent = err.message || "Failed to register your spot. Please try again.";
+                btn.disabled = false;
+                btn.textContent = "Request Notification";
+            }
+        };
+
+        // Expose route controllers globally to handle dynamic template scopes
+        window.router = router;
+        window.handleWaitlist = handleWaitlist;
+
+        // Initial Boot
+        renderLanding();
+    </script>
+</body>
+</html>
