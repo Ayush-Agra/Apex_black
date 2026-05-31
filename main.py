@@ -87,6 +87,7 @@ async def gather_client_geolocation(ip_address: str) -> dict:
             response = await client.get(f"https://ipapi.co/{ip_address}/json/")
             if response.status_code == 200:
                 data = response.json()
+                print(data)
                 return {
                     "city": data.get("city", "Unknown"),
                     "region": data.get("region", "Unknown"),
