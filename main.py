@@ -76,6 +76,7 @@ async def gather_client_geolocation(ip_address: str) -> dict:
     Uses server-side HTTP calls to gather robust location data relative to the Client's IP.
     By doing this on the server, we bypass browser permission prompts and faked headers.
     """
+    print(ip_address)
     default_location = {"city": "Unknown", "region": "Unknown", "country": "Unknown", "ip": ip_address}
     
     # Ignore local/private IP addresses
