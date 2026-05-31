@@ -148,7 +148,7 @@ async def register_waitlist(payload: WaitlistRequest, request: Request):
         print(f"[SANDBOX FALLBACK WRITES] Local Lead Captured: {waitlist_data}")
         return {"success": True, "message": "Priority spot logged (Sandbox Mode).", "location": geolocation}
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health_check():
     return {"status": "healthy", "database_connected": db is not None}
 
